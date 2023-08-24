@@ -140,6 +140,7 @@ function M.launch(opts)
   	end
   end
 
+  -- Starge a new neovim instance (child neovim).
   nvim_server = vim.fn.jobstart(args, {rpc = true, env = env})
 
   local mode = vim.fn.rpcrequest(nvim_server, "nvim_get_mode")
@@ -157,15 +158,19 @@ function M.launch(opts)
   end
 
   if not hook_addres then
+    -- Opan a RPC server so that it can be control by the child neovim.
     hook_address = vim.fn.serverstart()
   end
 
+  -- What is the use of this address?
+    -- I think that the spawned neovim can use this address to control the paraent neovim instance.
   vim.fn.rpcrequest(nvim_server, 'nvim_exec_lua', [[debug_hook_conn_address = ...]], {hook_address})
 
   M.server_messages = {}
 
   local host = (opts and opts.host) or "127.0.0.1"
   local port = (opts and opts.port) or 0
+  -- Start dap server from the spawned neovim instance.
   local server = vim.fn.rpcrequest(nvim_server, 'nvim_exec_lua', [[return require"osv".start_server(...)]], {host, port, opts and opts.log})
   if server == vim.NIL then
   	vim.api.nvim_echo({{("Server failed to launch on port %d"):format(port), "ErrorMsg"}}, true, {})
