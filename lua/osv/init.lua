@@ -158,12 +158,12 @@ function M.launch(opts)
   end
 
   if not hook_addres then
-    -- Opan a RPC server so that it can be control by the child neovim.
+    -- Opan a RPC server so that it can be controled by the child neovim.
     hook_address = vim.fn.serverstart()
   end
 
   -- What is the use of this address?
-    -- I think that the spawned neovim can use this address to control the paraent neovim instance.
+    -- Child neovim will use this address to create a chanel to control the paraent neovim instance.
   vim.fn.rpcrequest(nvim_server, 'nvim_exec_lua', [[debug_hook_conn_address = ...]], {hook_address})
 
   M.server_messages = {}
@@ -1175,6 +1175,7 @@ function M.start_server(host, port, do_log)
 
   server:bind(host, port)
 
+  -- :h uv.listen()
   server:listen(128, function(err)
     M.disconnected = false
 
